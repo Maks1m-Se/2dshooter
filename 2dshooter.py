@@ -1,12 +1,14 @@
 import pygame
 import random
+import os
 
 # Initialize Pygame
 pygame.init()
+pygame.mixer.init()
 
 ### Screen ###
 screen_width = 600
-screen_height = 900
+screen_height = 700
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("2D Shooter Game")
 
@@ -54,6 +56,14 @@ target_image = pygame.image.load('images/target.png').convert_alpha() # convert_
 target_image = pygame.transform.scale(target_image, (target_width, target_height)) # Resize the target image to match the target object dimensions
 targets = []
 
+### Sounds ###
+reload_sound = pygame.mixer.Sound(os.path.join('sounds', 'reload.wav'))
+hit_sound = pygame.mixer.Sound(os.path.join('sounds', 'hit.wav'))
+shot_sound = pygame.mixer.Sound(os.path.join('sounds', 'shot.flac'))
+gameplay_music = pygame.mixer.Sound(os.path.join('sounds', 'gameplay_music.wav'))
+
+
+
 # Target class
 class Target:
     def __init__(self, x, y):
@@ -82,6 +92,9 @@ font = pygame.font.Font(None, 20)
 ### Set up clock ###
 clock = pygame.time.Clock()
 
+gameplay_music.play()
+reload_sound.play()
+
 ### Game loop ###
 running = True
 while running:
@@ -97,6 +110,7 @@ while running:
             player.x = event.pos[0] - player_width // 2
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             # Shoot a bullet on right-click
+            shot_sound.play()
             bullet = pygame.Rect(player.x + player_width * 0.865 - bullet_width // 2,
                                  player.y,
                                  bullet_width,
@@ -113,6 +127,7 @@ while running:
     for bullet in bullets[:]:
         for target in targets[:]:
             if bullet.colliderect(target):
+                hit_sound.play()
                 bullets.remove(bullet)
                 targets.remove(target)
 
@@ -121,6 +136,7 @@ while running:
                     level += 1
                     # Speed increase
                     level_speed_increase += .5  # Increase the speed for the next level
+                    reload_sound.play()
                     create_targets()
 
     # Update targets
@@ -129,9 +145,9 @@ while running:
         target.rect.x += target.x_speed
         target.rect.y += target.y_speed
         # Bounce off the walls
-        if target.rect.left < 0 or target.rect.right > screen_width:
+        if target.rect.left <= 0 or target.rect.right >= screen_width:
             target.x_speed *= -1
-        if target.rect.top < 0 or target.rect.bottom > screen_height:
+        if target.rect.top <= 0 or target.rect.bottom >= (screen_height*.85):
             target.y_speed *= -1
 
     target_counter += 1
