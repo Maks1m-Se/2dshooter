@@ -141,6 +141,7 @@ async def main():
 
                         if level > max_level:
                             running = False
+                            await end()
                             break
 
                         level_speed_increase += 0.5  # Increase speed for next level
@@ -193,6 +194,9 @@ async def main():
         # Update the display
         pygame.display.flip()
 
+
+        
+
         await asyncio.sleep(0)
 
 
@@ -201,6 +205,14 @@ async def end():
     global waiting_for_quit
     pygame.mixer.stop()
     finished_music.play()
+
+    # End game screen
+    screen.fill((210, 210, 230))
+    end_text = end_font.render("Game finished!\nTotal Time: {:.2f}s".format(total_time + elapsed_time), True, BLACK)
+    end_text_rect = end_text.get_rect(center=(screen_width // 2, screen_height // 2))
+    screen.blit(end_text, end_text_rect)
+    pygame.display.flip()
+
     while waiting_for_quit:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -212,15 +224,10 @@ async def end():
 asyncio.run(main())
 
 
-# End game screen
-screen.fill((210, 210, 230))
-end_text = end_font.render("Game finished!\nTotal Time: {:.2f}s".format(total_time + elapsed_time), True, BLACK)
-end_text_rect = end_text.get_rect(center=(screen_width // 2, screen_height // 2))
-screen.blit(end_text, end_text_rect)
-pygame.display.flip()
+
 
 # Wait for the player to quit the app
-asyncio.run(end())
+
 
 # Quit the game
 pygame.quit()
